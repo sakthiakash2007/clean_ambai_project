@@ -1,0 +1,4 @@
+const C='ambai-v1',A=['/static/style.css','/static/icon-192.png'];
+self.addEventListener('install',e=>e.waitUntil(caches.open(C).then(c=>c.addAll(A))));
+self.addEventListener('fetch',e=>{const u=new URL(e.request.url);if(e.request.method!=='GET'||u.origin!==location.origin||u.pathname.startsWith('/api/'))return;
+e.respondWith(fetch(e.request).then(r=>{if(u.pathname.startsWith('/static/')){const x=r.clone();caches.open(C).then(c=>c.put(e.request,x))}return r}).catch(()=>caches.match(e.request).then(r=>r||new Response('<h2 style="font-family:sans-serif;padding:2em">You are offline. Please reconnect to report an issue.</h2>',{headers:{'Content-Type':'text/html'}}))))});

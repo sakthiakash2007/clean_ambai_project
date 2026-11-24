@@ -1,0 +1,4 @@
+flask
+pillow
+numpy
+ultralytics  # optional: heuristic fallback is used if missing

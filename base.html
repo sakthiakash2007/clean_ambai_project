@@ -1,0 +1,14 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="theme-color" content="#06323a"><title>Clean Ambai · Thamirabarani Watch</title>
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
+<link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}"></head><body>
+<div class="river" aria-hidden="true"><div class="sun"></div><div class="hills"></div>
+<svg class="wave w1" viewBox="0 0 1440 200" preserveAspectRatio="none"><path d="M0 100 Q180 20 360 100 T720 100 T1080 100 T1440 100 V200 H0Z"/></svg>
+<svg class="wave w2" viewBox="0 0 1440 200" preserveAspectRatio="none"><path d="M0 100 Q180 180 360 100 T720 100 T1080 100 T1440 100 V200 H0Z"/></svg>
+<svg class="wave w3" viewBox="0 0 1440 200" preserveAspectRatio="none"><path d="M0 100 Q180 40 360 100 T720 100 T1080 100 T1440 100 V200 H0Z"/></svg></div>
+<header><a class="brand" href="/"><span class="logo">🌊</span><span><b>Clean Ambai</b><small>Thamirabarani Watch · அம்பை</small></span></a>
+<nav><a href="/">Map</a><a class="cta" href="/report">Report</a><a href="/officer">Officer</a></nav></header>
+<main>{% block body %}{% endblock %}</main>
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>{% block js %}{% endblock %}</body></html>

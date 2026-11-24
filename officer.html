@@ -1,0 +1,10 @@
+{% extends "base.html" %}{% block body %}
+<section class="glass"><h2>Officer queues</h2><p>Prototype view — add authentication before real use.</p></section>
+{% for d,rows in depts.items() %}<section class="glass"><h3>{{d}} <span class="tag">{{rows|length}}</span></h3><div class="grid">
+{% for r in rows %}<div class="card"><span class="tag {{'hot' if r.priority.startswith(('HIGH','EMER'))}}">{{r.priority}}</span>
+<b>{{r.ticket}}</b><p>{{r.street}}{% if r.nearby %} · {{r.nearby}}{% endif %}</p><small>⏱ {{r.eta}}{% if r.waste_type %} · ♻ {{r.waste_type}}{% endif %}</small>{% if r.severity %}<small>🚛 {{r.severity}}<br>🤖 {{r.ai_note}}</small>{% endif %}
+{% if r.photo %}<img src="/static/uploads/{{r.photo}}" loading="lazy">{% endif %}
+<a href="https://www.google.com/maps?q={{r.lat}},{{r.lng}}" target="_blank">Navigate ↗</a>
+<select onchange="fetch('/api/status',{method:'POST',body:new URLSearchParams({id:{{r.id}},status:this.value})})">
+{% for s in ['Open','Assigned','In Progress','Resolved'] %}<option {{'selected' if s==r.status}}>{{s}}</option>{% endfor %}</select></div>{% endfor %}</div></section>
+{% else %}<section class="glass"><p>No reports yet.</p></section>{% endfor %}{% endblock %}

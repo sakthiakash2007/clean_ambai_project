@@ -1,0 +1,26 @@
+{% extends "base.html" %}{% block body %}
+<section class="hero glass"><h1>Keep our river clean.<br><em>Report in 30 seconds.</em></h1>
+<p>Waste, streetlights, roads & power hazards in Ambasamudram — auto-routed to the right officer.</p>
+<div class="stats"><div><b id="s1">–</b>Reports</div><div><b id="s2">–</b>Open</div><div><b id="s3">–</b>River priority</div></div>
+<a class="btn" href="/report">＋ Report an issue</a> <a class="btn alt" href="tel:9498794987">⚡ TANGEDCO Minnagam</a></section>
+<section class="glass"><div id="map" class="map"></div></section>
+<section class="glass"><h2>Recent reports</h2><div id="list" class="grid"></div></section>
+<section class="glass"><h2>📞 Contacts</h2><div class="grid">
+{% for k in ['municipality','sanitary','panchayat','vkpuram'] %}<div class="card"><b>{{c[k].name}}</b>
+<p>{% if c[k].phone %}<a href="tel:{{c[k].phone}}">{{c[k].phone}}</a>{% else %}<small>Phone not set – edit CONTACTS in app.py</small>{% endif %}{% if c[k].mobile %}<br><a href="tel:{{c[k].mobile}}">{{c[k].mobile}}</a>{% endif %}</p>
+{% if c[k].email %}<small>{{c[k].email}}</small>{% endif %}{% if c[k].addr %}<small>{{c[k].addr}}</small>{% endif %}</div>{% endfor %}
+<div class="card"><b>⚡ {{c.tangedco.name}}</b><p><a href="tel:{{c.tangedco.phone}}">{{c.tangedco.phone}}</a></p></div>
+<div class="card"><b>Emergency</b><p>{% for n,p in c.helplines %}<a href="tel:{{p}}">{{n}} {{p}}</a><br>{% endfor %}</p></div></div></section>
+<section class="glass"><h2>⏱ How long will it take?</h2><div class="grid">
+<div class="card"><b>🗑️ Waste near river</b><small>Pushcart: 24 h · Tipper lorry: 48 h</small></div>
+<div class="card"><b>🗑️ Waste elsewhere</b><small>Pushcart: 3 days · Tipper lorry: 5–7 days</small></div>
+<div class="card"><b>💡 Streetlight</b><small>3–5 working days</small></div>
+<div class="card"><b>🚧 Road</b><small>Town street 10–15 days · Highway 15–30 days</small></div>
+<div class="card"><b>⚡ Transformer</b><small>Emergency – call now</small></div></div><small>Target times, not guarantees.</small></section>
+{% endblock %}{% block js %}<script>
+const ICON={waste:'🗑️',streetlight:'💡',road:'🚧',transformer:'⚡'};
+const map=L.map('map').setView([8.7107,77.4538],13);L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png',{attribution:'© OpenStreetMap'}).addTo(map);
+fetch('/api/reports').then(r=>r.json()).then(d=>{s1.textContent=d.length;s2.textContent=d.filter(x=>x.status!='Resolved').length;s3.textContent=d.filter(x=>x.priority.startsWith('HIGH')).length;
+d.forEach(x=>{L.marker([x.lat,x.lng],{icon:L.divIcon({html:'<div class="pin">'+ICON[x.category]+'</div>',className:'',iconSize:[34,34]})}).addTo(map).bindPopup(`<b>${x.ticket}</b><br>${x.street}<br>${x.department}<br>${x.status}`)});
+list.innerHTML=d.slice(0,12).map(x=>`<div class="card"><span class="tag ${x.priority.startsWith('HIGH')||x.priority.startsWith('EMER')?'hot':''}">${x.priority}</span><b>${ICON[x.category]} ${x.ticket}</b><p>${x.street}</p><small>${x.department} · ${x.status}</small></div>`).join('')||'<p>No reports yet — be the first.</p>'});
+</script>{% endblock %}

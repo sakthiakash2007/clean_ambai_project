@@ -1,0 +1,36 @@
+{% extends "base.html" %}{% block body %}
+<form id="f" class="glass form"><h2>Report an issue</h2>
+<div class="chips" id="chips">
+{% for k,l in [('waste','🗑️ River / Street Waste'),('streetlight','💡 Streetlight'),('road','🚧 Road Damage'),('transformer','⚡ Transformer Hazard')] %}
+<label><input type="radio" name="category" value="{{k}}" required><span>{{l}}</span></label>{% endfor %}</div>
+<a id="sos" class="btn danger" href="tel:9498794987" hidden>📞 Call TANGEDCO Minnagam 94987 94987 now</a>
+<h3>📍 Location</h3><button type="button" class="btn" id="gps">Use My Current Location</button>
+<div id="badge" class="badge">Pin is at Ambasamudram centre — drag it or pick a landmark</div>
+<select id="lm" name="landmark">{% for n,a,b in landmarks %}<option value="{{n}}" data-lat="{{a or ''}}" data-lng="{{b or ''}}">{{n}}</option>{% endfor %}</select>
+<div id="map" class="map sm"></div>
+<input type="hidden" name="lat" id="lat"><input type="hidden" name="lng" id="lng">
+<input name="street" placeholder="Street / ward / address (required)" required>
+<input name="nearby" placeholder="Nearby landmark – e.g. Behind old bathing steps, 50m east of bridge">
+<textarea name="description" rows="3" placeholder="Describe the problem (optional)"></textarea>
+<label class="photo">📷 Add photo<input type="file" name="photo" accept="image/*" capture="environment" id="ph"></label><img id="prev" hidden>
+<button class="btn big" id="go">Submit report</button></form>
+<div id="res" class="glass form" hidden></div>
+{% endblock %}{% block js %}<script>
+const C=[{{center[0]}},{{center[1]}}],RIVER={{river|tojson}},RAD={{radius}};
+const map=L.map('map').setView(C,14);L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png',{attribution:'© OpenStreetMap'}).addTo(map);
+L.circle(C,{radius:RAD*1000,color:'#0aa',fillOpacity:.04,weight:1}).addTo(map);L.polyline(RIVER,{color:'#2b8cff',weight:6,opacity:.45}).addTo(map).bindTooltip('Thamirabarani (approx.)');
+const mk=L.marker(C,{draggable:true}).addTo(map);
+async function setPos(la,ln,pan){mk.setLatLng([la,ln]);if(pan)map.setView([la,ln],16);lat.value=la.toFixed(6);lng.value=ln.toFixed(6);
+const r=await (await fetch(`/api/geocheck?lat=${la}&lng=${ln}`)).json();
+badge.className='badge '+(r.in_zone?'ok':'warn');badge.textContent=r.in_zone?`✅ Verified in Ambai Service Zone (${r.km} km from centre${r.river_m<500?' · near river ⚠ high priority':''})`:`⚠ Outside the ${RAD} km Ambai zone (${r.km} km). Drag the pin inside Ambasamudram to test.`}
+mk.on('dragend',()=>{const p=mk.getLatLng();setPos(p.lat,p.lng)});map.on('click',e=>setPos(e.latlng.lat,e.latlng.lng));setPos(C[0],C[1]);
+gps.onclick=()=>{if(!navigator.geolocation)return alert('Geolocation not supported');gps.textContent='Locating…';
+navigator.geolocation.getCurrentPosition(p=>{gps.textContent='Use My Current Location';setPos(p.coords.latitude,p.coords.longitude,true)},e=>{gps.textContent='Use My Current Location';alert('Could not get GPS: '+e.message+'. Use a landmark or drag the pin.')},{enableHighAccuracy:true,timeout:15000})};
+lm.onchange=()=>{const o=lm.selectedOptions[0];if(o.dataset.lat)setPos(+o.dataset.lat,+o.dataset.lng,true)};
+chips.onchange=e=>{sos.hidden=e.target.value!=='transformer'};
+ph.onchange=()=>{if(ph.files[0]){prev.src=URL.createObjectURL(ph.files[0]);prev.hidden=false}};
+f.onsubmit=async e=>{e.preventDefault();go.disabled=true;go.textContent='Analysing…';
+const r=await fetch('/api/report',{method:'POST',body:new FormData(f)});const d=await r.json();go.disabled=false;go.textContent='Submit report';
+if(!r.ok)return alert(d.error);f.hidden=true;res.hidden=false;
+res.innerHTML=`<h2>✅ Ticket ${d.ticket}</h2><p><b>Routed to:</b> ${d.department}</p><p><b>Priority:</b> ${d.priority}</p><p><b>⏱ Expected clean-up / fix:</b> ${d.eta}</p>${d.waste_type?`<p><b>♻ Waste type:</b> ${d.waste_type}</p>`:''}${d.severity?`<p><b>Dispatch:</b> ${d.severity}</p><small>🤖 ${d.ai_note}</small>`:''}<br><a class="btn" href="/">View on map</a> <a class="btn alt" href="/report">Another report</a>`};
+</script>{% endblock %}

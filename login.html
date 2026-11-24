@@ -1,0 +1,3 @@
+{% extends "base.html" %}{% block body %}
+<form method="post" class="glass form"><h2>🔐 Officer login</h2>{% if err %}<div class="badge warn">{{err}}</div>{% endif %}
+<input type="password" name="password" placeholder="Officer password" required autofocus><button class="btn big">Log in</button></form>{% endblock %}

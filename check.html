@@ -1,0 +1,12 @@
+{% extends "base.html" %}{% block body %}
+<section class="glass form" style="max-width:none"><h2>📍 Verify coordinates</h2>
+<p>Drag each marker to its true location on the map. <b>Blue</b> = river points, <b>red</b> = highway points, <b>pins</b> = landmarks. Then copy the text below into <code>app.py</code>.</p>
+<div id="map" class="map" style="height:480px"></div><textarea id="out" rows="14" readonly></textarea></section>
+{% endblock %}{% block js %}<script>
+const map=L.map('map').setView({{center|tojson}},14);L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png',{attribution:'© OpenStreetMap'}).addTo(map);
+const LM={{landmarks|tojson}},RV={{river|tojson}},HW={{highway|tojson}};const M={lm:[],rv:[],hw:[]};
+function mk(p,kind,i,label){const m=L.marker([p[0],p[1]],{draggable:true,opacity:kind=='lm'?1:.8}).addTo(map).bindTooltip(label);m.on('dragend',dump);M[kind].push(m);return m}
+LM.forEach((l,i)=>mk([l[1],l[2]],'lm',i,l[0]));RV.forEach((p,i)=>mk(p,'rv',i,'River '+(i+1)));HW.forEach((p,i)=>mk(p,'hw',i,'Highway '+(i+1)));
+const f=m=>{const p=m.getLatLng();return [+p.lat.toFixed(5),+p.lng.toFixed(5)]};
+function dump(){out.value='RIVER = '+JSON.stringify(M.rv.map(f))+'\nHIGHWAY = '+JSON.stringify(M.hw.map(f))+'\n\n# Landmarks (name, lat, lng)\n'+M.lm.map((m,i)=>'("'+LM[i][0]+'",'+f(m)[0]+','+f(m)[1]+'),').join('\n')}
+dump();</script>{% endblock %}
