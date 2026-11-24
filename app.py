@@ -33,7 +33,7 @@ def eta_for(cat, dept, prio, lvl=1):
     if cat == "streetlight": return "3–5 working days"
     if cat == "transformer": return "Emergency – same day (call Minnagam now)"
     return "15–30 days" if "Highways" in dept else "10–15 days"
-app = Flask(__name__); app.config["MAX_CONTENT_LENGTH"] = 12*1024*1024
+app = Flask(__name__, template_folder=".", static_folder=".")
 os.makedirs(UP, exist_ok=True)
 app.secret_key = os.environ.get("SECRET_KEY", "change-this-secret")
 app.config.update(SESSION_COOKIE_SAMESITE="Lax", SESSION_COOKIE_HTTPONLY=True)
